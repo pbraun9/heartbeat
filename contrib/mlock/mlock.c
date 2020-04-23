@@ -294,7 +294,7 @@ read_testfile( struct task* task)
 	
 	if(memcmp(buf, msg, LOCKLEN) != 0){
 		output("\nread content is not matched\n");
-		output("conent in file is =%s,\n"
+		output("content in file is =%s,\n"
 		       "the msg compared with is %s\n", buf, msg);
 		exit(1);
 	}

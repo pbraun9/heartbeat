@@ -157,7 +157,7 @@ class LinuxHAv2(HeartbeatCM):
             self.log("Node %s is not up." % node)
             return None
 
-        if not self.CIBsync.has_key(node) and self.Env["ClobberCIB"] == 1:
+        if node not in self.CIBsync and self.Env["ClobberCIB"] == 1:
             self.CIBsync[node] = 1
             self.rsh.remote_py(node, "os", "system", "rm -f @HA_VARLIBDIR@/heartbeat/crm/cib.xml")
             self.rsh.remote_py(node, "os", "system", "rm -f @HA_VARLIBDIR@/heartbeat/crm/cib.xml.sig")

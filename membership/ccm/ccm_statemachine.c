@@ -3386,7 +3386,7 @@ static void ccm_state_wait_for_mem_list(enum ccm_type ccm_msg_type,
 			
 			if (cl_msg_get_list_int(reply,CCM_UPTIMELIST, 
 						uptime_list, &uptime_size) != HA_OK){
-				ccm_log(LOG_ERR,"%s: geting uptie_list failed",
+				ccm_log(LOG_ERR,"%s: getting uptie_list failed",
 					__FUNCTION__);
 				return;
 			}
@@ -3660,7 +3660,7 @@ static void ccm_state_new_node_wait_for_mem_list(enum ccm_type ccm_msg_type,
 			
 			if (cl_msg_get_list_int(reply,CCM_UPTIMELIST, 
 						uptime_list, &uptime_size) != HA_OK){
-				ccm_log(LOG_ERR,"%s: geting uptie_list failed", __FUNCTION__);
+				ccm_log(LOG_ERR,"%s: getting uptie_list failed", __FUNCTION__);
 				return;
 			}
 			

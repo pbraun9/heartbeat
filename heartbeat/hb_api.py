@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 '''Heartbeat related classes.
 
@@ -39,14 +39,14 @@ import grp
 global debug_level
 debug_level = 0
 def dbg(level, *args):
-	if level > debug_level:
-		return
-	print >> sys.stderr, "<%d>%s" % (level, " ".join(args))
+        if level > debug_level:
+                return
+        print("<%d>%s" % (level, " ".join(args)), file=sys.stderr)
 
 '''
-	"module" simple regex based netstring
-	We don't need an arbitrary buffer based netstring parser,
-	we only ever decode complete netstring messages of limitted size.
+        "module" simple regex based netstring
+        We don't need an arbitrary buffer based netstring parser,
+        we only ever decode complete netstring messages of limitted size.
 '''
 
 import re
@@ -54,24 +54,24 @@ def netstring_encode(s):
     return "%i:%s," % (len(s), s)
 
 def _netstring_decode(s):
-	while len(s):
-		m = re.match(r"(\d+):", s)
-		if not m:
-			raise ValueError("invalid size digit: expected '\d+:', but got '%c'" % s[0])
+        while len(s):
+                m = re.match(r"(\d+):", s)
+                if not m:
+                        raise ValueError("invalid size digit: expected '\d+:', but got '%c'" % s[0])
 
-		l = len(m.group(0))
-		n = int(m.group(1))
-		if len(s) < n + l:
-			raise ValueError("truncated input: expected %u bytes, only %u available" % (n, len(s)))
-		if s[n+l] != ',':
-			raise ValueError("invalid input: expected ',' terminator, but got '%c'" % s[n+l])
-		v = s[l:n+l]
-		s = s[n+l+1:]
-		yield v
+                l = len(m.group(0))
+                n = int(m.group(1))
+                if len(s) < n + l:
+                        raise ValueError("truncated input: expected %u bytes, only %u available" % (n, len(s)))
+                if s[n+l] != ',':
+                        raise ValueError("invalid input: expected ',' terminator, but got '%c'" % s[n+l])
+                v = s[l:n+l]
+                s = s[n+l+1:]
+                yield v
 
 
 def netstring_decode(data):
-	return list(_netstring_decode(data))
+        return list(_netstring_decode(data))
 
 class ha_msg (UserDict): 
 
@@ -106,7 +106,7 @@ class ha_msg (UserDict):
 
     Constructor arguments:
         dictionaries, ha_msg objects, 2-element lists/tuples, files
-	strings (in canonical msg format)
+        strings (in canonical msg format)
 
     Exceptions raised:
 
@@ -117,7 +117,7 @@ class ha_msg (UserDict):
        when you give us messages you can't guarantee are perfect.
     '''
 
-    #	Field names start with F_...
+    #   Field names start with F_...
 
     F_TYPE="t"
     F_ORIG="src"
@@ -138,7 +138,7 @@ class ha_msg (UserDict):
     F_PNAME="pname"
     F_PVALUE="pvalue"
 
-    #	Message types start with T_...
+    #   Message types start with T_...
 
     T_APIREQ="hbapi-req"
     T_APIRESP="hbapi-resp"
@@ -152,21 +152,21 @@ class ha_msg (UserDict):
     #   Things we need for making network-compatible strings
     #   from ha_msg objects
     #
-    max_reprlen = 1024	# Maximum length string for an ha_msg
+    max_reprlen = 1024  # Maximum length string for an ha_msg
     startstr=">>>\n"
     endstr="<<<\n"
-    endstr0="<<<\n\0"	# Bug to bug compatibility :-/
+    endstr0="<<<\n\0"   # Bug to bug compatibility :-/
     start_netstr="###\n"
     end_netstr="%%%\n"
-    __str__ = UserDict.__repr__	 # use default __str__ function
+    __str__ = UserDict.__repr__          # use default __str__ function
 
 
     def __init__(self, *args):
 
-    	'''Initialize the ha_msg according to the parameters we're given'''
+        '''Initialize the ha_msg according to the parameters we're given'''
 
         self.data = {}
-	for arg in args:
+        for arg in args:
             self.update(arg)
 
     def update(self, *args):
@@ -174,53 +174,53 @@ class ha_msg (UserDict):
         '''Update the message from info in our arguments
            We currently allow these kinds of arguments:
              dictionary, ha_msg, tuple, list, string, file...
-	'''
+        '''
 #
-#	It would be nice to check for type attributes rather than
-#	for specific types...
+#       It would be nice to check for type attributes rather than
+#       for specific types...
 #
-	for arg in args:
+        for arg in args:
 
             # Do we have a String?
-            if isinstance(arg, types.StringType):
+            if isinstance(arg, bytes):
                 self.fromstring(arg)
 
             # Do we have a 2-element Tuple/List?
-            elif (isinstance(arg, types.TupleType)
-            or    isinstance(arg, types.ListType)):
+            elif (isinstance(arg, tuple)
+            or    isinstance(arg, list)):
 
                 if len(arg) != 2: raise ValueError("wrong size tuple/list")
                 self[arg[0]] = arg[1]
 
             # Do we have a dictionary or ha_msg object?
-            elif (isinstance(arg, types.DictType)
+            elif (isinstance(arg, dict)
             or   (isinstance(arg, types.InstanceType)
                   and issubclass(arg.__class__, UserDict))):
 
-                for key in arg.keys():
-		    self[key] = arg[key]
+                for key in list(arg.keys()):
+                    self[key] = arg[key]
 
             # How about a file?
             elif isinstance(arg, types.FileType):
-    		self.fromfile(arg)
-	    # or a socket?
-	    elif isinstance(arg, socket.SocketType):
-		self.fromsock(arg)
+                self.fromfile(arg)
+            # or a socket?
+            elif isinstance(arg, socket.SocketType):
+                self.fromsock(arg)
             else: 
-	      raise ValueError("bad type in update")
+              raise ValueError("bad type in update")
 
-#	I can imagine more validation being useful...
-#	The strings have more constraints than this code enforces...
-#	They can't contain NULLs, or \r or \n
+#       I can imagine more validation being useful...
+#       The strings have more constraints than this code enforces...
+#       They can't contain NULLs, or \r or \n
 #
-#	The names should be legitimate environment var names
-#	(for example, can't contain '=')
-#	etc...
+#       The names should be legitimate environment var names
+#       (for example, can't contain '=')
+#       etc...
 
     def __setitem__(self, k, value):
-        if (not isinstance(k, types.StringType)
-        or  not isinstance(k, types.StringType)):
-		raise ValueError("non-string data")
+        if (not isinstance(k, bytes)
+        or  not isinstance(k, bytes)):
+                raise ValueError("non-string data")
         self.data[k] = value
 
     def __repr__(self):
@@ -229,12 +229,12 @@ class ha_msg (UserDict):
            that heartbeat expects us to use.
         '''
 
-	ret = ha_msg.startstr
-        for i in self.items():
+        ret = ha_msg.startstr
+        for i in list(self.items()):
             ret = ret + i[0] + "=" + i[1] + "\n"
-	ret = ret + ha_msg.endstr
+        ret = ret + ha_msg.endstr
 
-	if len(ret) <= ha_msg.max_reprlen:
+        if len(ret) <= ha_msg.max_reprlen:
             return ret
         raise ValueError("message length error")
 
@@ -248,54 +248,54 @@ class ha_msg (UserDict):
            (like comes from heartbeat or __repr__())
         '''
 
-	if  (s[:len(ha_msg.start_netstr)] == ha_msg.start_netstr
-	and  s[-len(ha_msg.end_netstr):] == ha_msg.end_netstr) :
-		return self.from_netstring(s[len(ha_msg.start_netstr):-len(ha_msg.end_netstr)])
+        if  (s[:len(ha_msg.start_netstr)] == ha_msg.start_netstr
+        and  s[-len(ha_msg.end_netstr):] == ha_msg.end_netstr) :
+                return self.from_netstring(s[len(ha_msg.start_netstr):-len(ha_msg.end_netstr)])
 
-	#
-	# It should start w/ha_msg.startstr, and end w/ha_msg.endstr
-	#
-	if  (s[:len(ha_msg.startstr)] != ha_msg.startstr
-	or   (s[-len(ha_msg.endstr):] != ha_msg.endstr and
-	      s[-len(ha_msg.endstr0):] != ha_msg.endstr0)) :
-		raise ValueError("message format error")
+        #
+        # It should start w/ha_msg.startstr, and end w/ha_msg.endstr
+        #
+        if  (s[:len(ha_msg.startstr)] != ha_msg.startstr
+        or   (s[-len(ha_msg.endstr):] != ha_msg.endstr and
+              s[-len(ha_msg.endstr0):] != ha_msg.endstr0)) :
+                raise ValueError("message format error")
 
 
         #
         # Split up the string into lines, and process each
-	# line as a name=value pair
+        # line as a name=value pair
         #
-	strings = s.split('\n')[1:-2]
+        strings = s.split('\n')[1:-2]
         for astring in strings:
             # Update-from-list is handy here...
-	    # FT_STRING, standard plain text string field
-	    # in the "classic" (not netstring) message format,
-	    # this is sent as, you guessed right, plain text string,
-	    # no leading "(type)" indicator.
-	    if astring[0] != "(":
-		self.update(astring.split('=', 1))
-	    # else: 
-	    #   (1) FT_BINARY
-	    #   (2) FT_STRUCT
-	    #   (3) FT_LIST
-	    #   (4) FT_COMPRESS
-	    #   (5) FT_UNCOMPRESS
-	    #   IGNORE THESE FOR NOW.
+            # FT_STRING, standard plain text string field
+            # in the "classic" (not netstring) message format,
+            # this is sent as, you guessed right, plain text string,
+            # no leading "(type)" indicator.
+            if astring[0] != "(":
+                self.update(astring.split('=', 1))
+            # else: 
+            #   (1) FT_BINARY
+            #   (2) FT_STRUCT
+            #   (3) FT_LIST
+            #   (4) FT_COMPRESS
+            #   (5) FT_UNCOMPRESS
+            #   IGNORE THESE FOR NOW.
 
     def from_netstring(self, s):
-	l = netstring_decode(s)
-	for astring in iter(l):
-	    if astring[:3] == "(0)":
-		# FT_STRING, standard plain text string field
-		self.update(astring[3:].split("=", 1))
-	    # else: 
-	    #   (1) FT_BINARY
-	    #   (2) FT_STRUCT
-	    #   (3) FT_LIST
-	    #   (4) FT_COMPRESS
-	    #   (5) FT_UNCOMPRESS
-	    #   IGNORE THESE FOR NOW.
-	    #	self.update(astring.split("=", 1))
+        l = netstring_decode(s)
+        for astring in iter(l):
+            if astring[:3] == "(0)":
+                # FT_STRING, standard plain text string field
+                self.update(astring[3:].split("=", 1))
+            # else: 
+            #   (1) FT_BINARY
+            #   (2) FT_STRUCT
+            #   (3) FT_LIST
+            #   (4) FT_COMPRESS
+            #   (5) FT_UNCOMPRESS
+            #   IGNORE THESE FOR NOW.
+            #   self.update(astring.split("=", 1))
 
     def fromfile(self, f):
 
@@ -317,27 +317,27 @@ class ha_msg (UserDict):
             line = f.readline()
             if line == "" : raise ValueError("EOF")
             delimfound = (line == ha_msg.endstr)
-	    if not delimfound: self.update(line[:-1].split('=', 1))
+            if not delimfound: self.update(line[:-1].split('=', 1))
 
     def fromsock(self, s):
-	len_magic = ''
-	len_magic = s.recv(8, socket.MSG_WAITALL)
-	if len(len_magic) < 8:
-		# should not happen, would have raised socket.error already
-		raise ValueError("short recv expecting 8 byte header")
-	(l, magic) = struct.unpack("II", len_magic)
-	msg = s.recv(l, socket.MSG_WAITALL)
-	dbg(2, "RECEIVED MESSAGE", msg)
-	if len(msg) < l:
-		raise ValueError("short recv expecting %u byte payload" % l)
-	self.fromstring(msg)
-	dbg(3, "PARSED AS: ", repr(self))
+        len_magic = ''
+        len_magic = s.recv(8, socket.MSG_WAITALL)
+        if len(len_magic) < 8:
+                # should not happen, would have raised socket.error already
+                raise ValueError("short recv expecting 8 byte header")
+        (l, magic) = struct.unpack("II", len_magic)
+        msg = s.recv(l, socket.MSG_WAITALL)
+        dbg(2, "RECEIVED MESSAGE", msg)
+        if len(msg) < l:
+                raise ValueError("short recv expecting %u byte payload" % l)
+        self.fromstring(msg)
+        dbg(3, "PARSED AS: ", repr(self))
 
     def tosock(self, s):
         '''Send an ha_msg to a socket, and flush it.'''
-	msg = repr(self)
-	dbg(2, "SENDING", msg)
-	s.sendall(struct.pack("II", len(msg), 0xabcd) + msg)
+        msg = repr(self)
+        dbg(2, "SENDING", msg)
+        s.sendall(struct.pack("II", len(msg), 0xabcd) + msg)
         return 1
 
 class hb_api:
@@ -349,12 +349,12 @@ class hb_api:
     the cluster, and to receive messages from the cluster.
     '''
 #
-#	Probably the exceptions we trap should have messages that
-#	go along with them, since they shouldn't happen.
+#       Probably the exceptions we trap should have messages that
+#       go along with them, since they shouldn't happen.
 #
 
 #
-#	Various constants that are part of the heartbeat API
+#       Various constants that are part of the heartbeat API
 #
     SIGNON="signon"
     SIGNOFF="signoff"
@@ -377,7 +377,7 @@ class hb_api:
     _pid=os.getpid()
 
     def __init__(self, debug=0):
-	global debug_level
+        global debug_level
         self.SignedOn=0
         self.socket = None
         self.iscasual=1
@@ -385,10 +385,10 @@ class hb_api:
         self.Callbacks = {}
         self.NodeCallback = None
         self.IFCallback = None
-	self.Nodes = None
-	self.hbversion = None
-	self.pacemaker = None
-	debug_level = debug
+        self.Nodes = None
+        self.hbversion = None
+        self.pacemaker = None
+        debug_level = debug
 
     def __del__(self):
         '''hb_api class destructor.
@@ -405,7 +405,7 @@ class hb_api:
 
         '''Create a standard boilerplate API message'''
 
-	return ha_msg(
+        return ha_msg(
            { ha_msg.F_TYPE   : ha_msg.T_APIREQ,
              ha_msg.F_APIREQ : msgtype,
              ha_msg.F_PID    : repr(hb_api._pid),
@@ -438,18 +438,18 @@ class hb_api:
         if self.NodeCallback and (msgtype == ha_msg.T_STATUS
         or                        msgtype == ha_msg.T_NS_STATUS):
             node=msg[ha_msg.F_ORIG]
-	    stat=msg[ha_msg.F_STATUS]
+            stat=msg[ha_msg.F_STATUS]
             self.NodeCallback[0](node, stat, self.NodeCallback[1])
             return 1
 
         if self.IFCallback and msgtype == ha_msg.T_IFSTATUS:
             node=msg[ha_msg.F_NODE]
-	    iface=msg[ha_msg.F_IFNAME]
+            iface=msg[ha_msg.F_IFNAME]
             stat=msg[ha_msg.F_STATUS]
             self.IFCallback[0](node, iface, stat, self.IFCallback[1])
             return 1
 
-        if self.Callbacks.has_key(msgtype):
+        if msgtype in self.Callbacks:
             entry = self.Callbacks[msgtype]
             entry[0](msg, entry[1])
             return 1
@@ -463,16 +463,16 @@ class hb_api:
         if len(self.MsgQ) > 0:
             return self.MsgQ.pop(0)
 
-	if timeout and not self.msgready(timeout=timeout):
-	    return None
-	elif not blocking and not self.msgready(timeout=0):
+        if timeout and not self.msgready(timeout=timeout):
+            return None
+        elif not blocking and not self.msgready(timeout=0):
             return None
 
         # ok, if msgready returned True,
-	# but we only have a partial message in the socket buffer,
-	# and the socket has its default timeout of "None",
-	# we will still potentially block "forever"...
-	# but half-delivered messages "should not happen"...
+        # but we only have a partial message in the socket buffer,
+        # and the socket has its default timeout of "None",
+        # we will still potentially block "forever"...
+        # but half-delivered messages "should not happen"...
 
         try:
             return ha_msg(self.socket)
@@ -503,13 +503,13 @@ class hb_api:
 
         if self.socket:
             msg = self.__api_msg(hb_api.SIGNOFF)
-	    try:
-		    msg.tosock(self.socket)
-		    self.socket.close()
-	    except socket.error, e:
-		    # may already be closed by the remote side
-		    pass
-	    self.socket = None
+            try:
+                    msg.tosock(self.socket)
+                    self.socket.close()
+            except socket.error as e:
+                    # may already be closed by the remote side
+                    pass
+            self.socket = None
         self.SignedOn=0
 
     def signon(self, service=None):
@@ -526,41 +526,41 @@ class hb_api:
 
         self.OurNode = os.uname()[1].lower()
 
-	msg = hb_api.__api_msg(self, hb_api.SIGNON)
-	msg.update({
-	 "uid" : "%u" % os.getuid(),
-	 "gid" : "%u" % os.getgid() })
+        msg = hb_api.__api_msg(self, hb_api.SIGNON)
+        msg.update({
+         "uid" : "%u" % os.getuid(),
+         "gid" : "%u" % os.getgid() })
 
         try:
             s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             s.connect(hb_register_socket_name);
-        except socket.error, e:
-            print >> sys.stderr, "connect(%s): %s" % (hb_register_socket_name, e)
+        except socket.error as e:
+            print("connect(%s): %s" % (hb_register_socket_name, e), file=sys.stderr)
 
         # Send the registration request
-	msg.tosock(s)
-	self.socket = s
+        msg.tosock(s)
+        self.socket = s
 
         try:
             # Read the reply
             reply = self.__get_reply()
 
-	    # Read the return code
+            # Read the return code
             rc =  reply[ha_msg.F_APIRESULT]
 
             if rc == hb_api.OK :
-		self.socket = s
+                self.socket = s
                 self.SignedOn=1
-		if "hbversion" in reply:
-			self.hbversion = reply["hbversion"]
-		if "pacemaker" in reply:
-			self.pacemaker = reply["pacemaker"]
+                if "hbversion" in reply:
+                        self.hbversion = reply["hbversion"]
+                if "pacemaker" in reply:
+                        self.pacemaker = reply["pacemaker"]
                 return 1
-	    self.signoff()
+            self.signoff()
             return None
 
         except (KeyError,ValueError,TypeError):
-	    self.signoff()
+            self.signoff()
             return None
 
     def setfilter(self, fmask):
@@ -572,7 +572,7 @@ class hb_api:
 
         msg = hb_api.__api_msg(self, hb_api.SETFILTER)
         msg[ha_msg.F_FILTERMASK] = "%x" % fmask
-	msg.tosock(self.socket)
+        msg.tosock(self.socket)
 
         try:
             reply = self.__get_reply()
@@ -592,7 +592,7 @@ class hb_api:
         msg = hb_api.__api_msg(self, hb_api.SETSIGNAL)
         msg[ha_msg.F_SIGNAL] = "%d" % signal
 
-	msg.tosock(self.socket)
+        msg.tosock(self.socket)
 
         try:
             reply = self.__get_reply()
@@ -610,14 +610,14 @@ class hb_api:
 
         '''Retrieve the list of nodes in the cluster'''
 
-	if usecache and self.Nodes != None:
-	    return self.Nodes
+        if usecache and self.Nodes != None:
+            return self.Nodes
 
-	self.Nodes = None
-	Nodes = {}
-	msg = hb_api.__api_msg(self, hb_api.NODELIST)
+        self.Nodes = None
+        Nodes = {}
+        msg = hb_api.__api_msg(self, hb_api.NODELIST)
 
-	msg.tosock(self.socket)
+        msg.tosock(self.socket)
 
         try:
             while 1:
@@ -626,17 +626,17 @@ class hb_api:
                 if rc != hb_api.OK and rc != hb_api.MORE:
                     return None
 
-		nodename = reply[ha_msg.F_NODENAME]
-		node = { "name" : nodename }
-		if ha_msg.F_NODETYPE in reply:
-		    node['type'] = reply[ha_msg.F_NODETYPE]
-		if ha_msg.F_STATUS in reply:
-		    node['status'] = reply[ha_msg.F_STATUS]
+                nodename = reply[ha_msg.F_NODENAME]
+                node = { "name" : nodename }
+                if ha_msg.F_NODETYPE in reply:
+                    node['type'] = reply[ha_msg.F_NODETYPE]
+                if ha_msg.F_STATUS in reply:
+                    node['status'] = reply[ha_msg.F_STATUS]
 
                 Nodes[nodename] = node
 
                 if rc == hb_api.OK :
-		   self.Nodes = Nodes
+                   self.Nodes = Nodes
                    return Nodes
                 elif rc == hb_api.MORE:
                    continue
@@ -651,10 +651,10 @@ class hb_api:
         '''Retrieve the list of interfaces to the given node'''
 
         Interfaces = {}
-	msg = hb_api.__api_msg(self, hb_api.IFLIST)
+        msg = hb_api.__api_msg(self, hb_api.IFLIST)
         msg[ha_msg.F_NODENAME] = node
 
-	msg.tosock(self.socket)
+        msg.tosock(self.socket)
 
         try:
             while 1:
@@ -663,18 +663,18 @@ class hb_api:
                 if rc != hb_api.OK and rc != hb_api.MORE :
                     return None
 
-		ifname = reply[ha_msg.F_IFNAME]
-		if ha_msg.F_STATUS in reply:
-		    ifstat = reply[ha_msg.F_STATUS]
-		else:
-		    ifstat = None
+                ifname = reply[ha_msg.F_IFNAME]
+                if ha_msg.F_STATUS in reply:
+                    ifstat = reply[ha_msg.F_STATUS]
+                else:
+                    ifstat = None
 
-		# Don't put duplicates in the list.
-		# This would happen for example if you have
-		# multiple ucast statements (one for each node)
-		# on the same interface
-		if not ifname in Interfaces:
-		    Interfaces[ifname] = ifstat
+                # Don't put duplicates in the list.
+                # This would happen for example if you have
+                # multiple ucast statements (one for each node)
+                # on the same interface
+                if not ifname in Interfaces:
+                    Interfaces[ifname] = ifstat
 
                 if rc == hb_api.OK :
                    return Interfaces
@@ -690,11 +690,11 @@ class hb_api:
 
         '''Retrieve the status of the given node'''
 
-	msg = hb_api.__api_msg(self, hb_api.NODESTATUS)
-	msg[ha_msg.F_NODENAME]=node
+        msg = hb_api.__api_msg(self, hb_api.NODESTATUS)
+        msg[ha_msg.F_NODENAME]=node
 
 
-	msg.tosock(self.socket)
+        msg.tosock(self.socket)
 
         try:
 
@@ -712,10 +712,10 @@ class hb_api:
 
         '''Retrieve the value of the named parameter'''
 
-	msg = hb_api.__api_msg(self, hb_api.GETPARM)
-	msg[ha_msg.F_PNAME]=pname
+        msg = hb_api.__api_msg(self, hb_api.GETPARM)
+        msg[ha_msg.F_PNAME]=pname
 
-	msg.tosock(self.socket)
+        msg.tosock(self.socket)
 
         try:
 
@@ -727,27 +727,27 @@ class hb_api:
             return reply[ha_msg.F_PVALUE]
 
         except (KeyError, ValueError):
-	    if pname == "pacemaker":
-		return self.getparm("crm")
+            if pname == "pacemaker":
+                return self.getparm("crm")
             return None
 
     def get_hbversion(self):
-	if self.hbversion == None:
-	    self.hbversion = self.getparm("hbversion")
-	return self.hbversion
+        if self.hbversion == None:
+            self.hbversion = self.getparm("hbversion")
+        return self.hbversion
 
     def get_pacemaker(self):
-	if self.pacemaker == None:
-	    self.pacemaker = self.getparm("pacemaker")
-	return self.pacemaker
+        if self.pacemaker == None:
+            self.pacemaker = self.getparm("pacemaker")
+        return self.pacemaker
 
     def getrsc(self):
 
         '''Retrieve the value of the named parameter'''
 
-	msg = hb_api.__api_msg(self, hb_api.GETRESOURCES)
+        msg = hb_api.__api_msg(self, hb_api.GETRESOURCES)
 
-	msg.tosock(self.socket)
+        msg.tosock(self.socket)
 
         try:
             reply = self.__get_reply()
@@ -764,10 +764,10 @@ class hb_api:
 
         '''Retrieve the node-type of the given node ("normal" or "ping")'''
 
-	msg = hb_api.__api_msg(self, hb_api.NODETYPE)
-	msg[ha_msg.F_NODENAME]=node
+        msg = hb_api.__api_msg(self, hb_api.NODETYPE)
+        msg[ha_msg.F_NODENAME]=node
 
-	msg.tosock(self.socket)
+        msg.tosock(self.socket)
 
         try:
 
@@ -785,11 +785,11 @@ class hb_api:
 
         '''Retrieve the status of the given interface on the given node'''
 
-	msg = hb_api.__api_msg(self, hb_api.IFSTATUS)
-	msg[ha_msg.F_NODENAME]=node
-	msg[ha_msg.F_IFNAME]=interface
+        msg = hb_api.__api_msg(self, hb_api.IFSTATUS)
+        msg[ha_msg.F_NODENAME]=node
+        msg[ha_msg.F_IFNAME]=interface
 
-	msg.tosock(self.socket)
+        msg.tosock(self.socket)
 
         try:
 
@@ -811,15 +811,15 @@ class hb_api:
         '''
 
         Nodes = self.nodelist()
-        for (nodename, node) in Nodes.iteritems():
-	    if not 'status' in node:
-		node["status"] = self.nodestatus(nodename)
-	    if not 'type' in node:
-		node["type"] = self.nodetype(nodename)
+        for (nodename, node) in Nodes.items():
+            if not 'status' in node:
+                node["status"] = self.nodestatus(nodename)
+            if not 'type' in node:
+                node["type"] = self.nodetype(nodename)
             interfaces = self.iflist(nodename)
-            for (ifname, ifstat) in interfaces.iteritems():
-		if ifstat == None:
-		   interfaces[ifname] = self.ifstatus(nodename, ifname)
+            for (ifname, ifstat) in interfaces.items():
+                if ifstat == None:
+                   interfaces[ifname] = self.ifstatus(nodename, ifname)
             node["interfaces"] = interfaces
         return Nodes
 
@@ -829,11 +829,11 @@ class hb_api:
         '''
         if status == None: status=hb_api.ActiveStatus
         ret = []
-        for (nodename, node) in self.nodelist().iteritems():
-	    if "status" in node:
-		nodestatus = node["status"]
-	    else:
-		nodestatus = self.nodestatus(nodename)
+        for (nodename, node) in self.nodelist().items():
+            if "status" in node:
+                nodestatus = node["status"]
+            else:
+                nodestatus = self.nodestatus(nodename)
             if nodestatus == status:
                 ret.append(nodename)
         return ret
@@ -872,7 +872,7 @@ class hb_api:
 
         msg =ha_msg(origmsg)
         msg[ha_msg.F_ORIG] = self.OurNode
-	return msg.tosock(self.socket)
+        return msg.tosock(self.socket)
 
     def sendnodemsg(self, origmsg, node):
 
@@ -885,7 +885,7 @@ class hb_api:
         msg[ha_msg.F_ORIG] = self.OurNode
         msg[ha_msg.F_TO] = node
 
-	return msg.tosock(self.socket)
+        return msg.tosock(self.socket)
 
 
     def set_msg_callback(self, msgtype, callback, data):
@@ -895,13 +895,13 @@ class hb_api:
            that particular message type.
         '''
 
-        if self.Callbacks.has_key(msgtype) :
+        if msgtype in self.Callbacks :
             ret=self.Callbacks[msgtype]
         else:
             ret=None
 
         if callback == None :
-            if self.Callbacks.has_key(msgtype) :
+            if msgtype in self.Callbacks :
                 del self.Callbacks[msgtype]
             return ret
 
@@ -940,20 +940,20 @@ class hb_api:
         return ret
 
 def nodestatus(node, stat, data):
-	try:
-		prev = data[node]["status"]
+        try:
+                prev = data[node]["status"]
         except (KeyError,ValueError):
-		prev = "?"
-	print "*** NODE STATUS CHANGE: %s now %s, was %s" % (node, stat, prev)
-	data[node]["status"] = stat
+                prev = "?"
+        print("*** NODE STATUS CHANGE: %s now %s, was %s" % (node, stat, prev))
+        data[node]["status"] = stat
 
 def ifstatus(node, iface, stat, data):
-	try:
-		prev = data[node]["interfaces"][iface]
+        try:
+                prev = data[node]["interfaces"][iface]
         except (KeyError,ValueError):
-		prev = "?"
-	print "*** INTERFACE STATUS CHANGE: %s to %s now %s, was %s" % (iface, node, stat, prev)
-	data[node]["interfaces"][iface] = stat
+                prev = "?"
+        print("*** INTERFACE STATUS CHANGE: %s to %s now %s, was %s" % (iface, node, stat, prev))
+        data[node]["interfaces"][iface] = stat
 
 #
 #   A little test code...
@@ -964,8 +964,8 @@ def main(argv):
 
     hb = hb_api(debug=0)
     if not hb.signon():
-	print "Cannot signon to heartbeat API"
-	exit(1)
+        print("Cannot signon to heartbeat API")
+        exit(1)
 
     dbg(1, "Now signed on to heartbeat API...")
     dbg(1, "Asking for node and link status ...")
@@ -974,26 +974,26 @@ def main(argv):
     # but ...
     config = hb.cluster_config()
 
-    print "Heartbeat Version:", hb.get_hbversion()
+    print("Heartbeat Version:", hb.get_hbversion())
     pacemaker = hb.get_pacemaker()
     if pacemaker in ["false", "off", "no", "n", "0"]:
-	    print "Resources:", hb.getrsc()
+            print("Resources:", hb.getrsc())
     else:
-	    print "Pacemaker:", pacemaker
+            print("Pacemaker:", pacemaker)
 
-    print "\nNodes in cluster:", config.keys()
-    for node in config.keys():
-	 type = config[node]["type"]
-	 state = config[node]["status"]
-         print "\nStatus of %s node %s: %s" %  (type, node, state)
-	 iflist = config[node]["interfaces"].keys()
-         print "\tInterfaces to %s: %s" % (node, iflist)
+    print("\nNodes in cluster:", list(config.keys()))
+    for node in list(config.keys()):
+         type = config[node]["type"]
+         state = config[node]["status"]
+         print("\nStatus of %s node %s: %s" %  (type, node, state))
+         iflist = list(config[node]["interfaces"].keys())
+         print("\tInterfaces to %s: %s" % (node, iflist))
          for intf in iflist:
              state = config[node]["interfaces"][intf]
-             print "\tInterface %s to %s: %s" % (intf, node, state)
+             print("\tInterface %s to %s: %s" % (intf, node, state))
 
     if not '--monitor' in argv:
-	return
+        return
 
     dbg(0, "\nListening for node or link status changes...\n")
     hb.set_nstatus_callback(nodestatus, config)
@@ -1005,9 +1005,9 @@ def main(argv):
 
 if __name__ == '__main__':
     try:
-	main(sys.argv)
+        main(sys.argv)
     except KeyboardInterrupt:
-	pass
-    except socket.error, e:
-	print "Socket error: %s" % e
-	exit(1)
+        pass
+    except socket.error as e:
+        print("Socket error: %s" % e)
+        exit(1)

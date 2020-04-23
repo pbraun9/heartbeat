@@ -128,7 +128,7 @@ class ResourceAudit(ClusterAudit):
                     +   "(otherRsc = " + repr(lastResource) + ")")
                     Fatal = 1
 
-                if self.CM.Env.has_key("SuppressMonitoring") and \
+                if "SuppressMonitoring" in self.CM.Env and \
                 self.CM.Env["SuppressMonitoring"]:
                     continue
 
@@ -256,7 +256,7 @@ class HAResourceAudit(ClusterAudit):
                     +        repr(RunningNodes))
                     passed = 0
             else:
-                if not NumofInc.has_key(resource.inc_name):
+                if resource.inc_name not in NumofInc:
                     NumofInc[resource.inc_name]=0
                     MaxofInc[resource.inc_name]=resource.inc_max
                 running = 1
@@ -280,7 +280,7 @@ class HAResourceAudit(ClusterAudit):
                     NumofInc[resource.inc_name] += 1
 
         if self.CM.HasQuorum(None):
-            for inc_name in NumofInc.keys():
+            for inc_name in list(NumofInc.keys()):
                 if NumofInc[inc_name] != min(up_count, MaxofInc[inc_name]):
                     passed = 0
                     self.CM.log("Cloned resource "+ str(inc_name)
@@ -319,7 +319,7 @@ class HAResourceAudit(ClusterAudit):
         for dependency in Dependancies:
             if dependency["type"] == "placement" and dependency["strength"] == "must":
                 if NodeofRsc[dependency["from"]] != NodeofRsc[dependency["to"]]:
-                    print dependency["from"] + " and " + dependency["to"] + " should be run on same node"
+                    print((dependency["from"] + " and " + dependency["to"] + " should be run on same node"))
                     passed = 0
                   
         return passed
@@ -343,7 +343,7 @@ class CrmdStateAudit(ClusterAudit):
         ,        "auditfail":0}
 
     def has_key(self, key):
-        return self.Stats.has_key(key)
+        return key in self.Stats
 
     def __setitem__(self, key, value):
         self.Stats[key] = value
@@ -353,7 +353,7 @@ class CrmdStateAudit(ClusterAudit):
 
     def incr(self, name):
         '''Increment (or initialize) the value associated with the given name'''
-        if not self.Stats.has_key(name):
+        if name not in self.Stats:
             self.Stats[name]=0
         self.Stats[name] = self.Stats[name]+1
 
@@ -410,7 +410,7 @@ class CIBAudit(ClusterAudit):
         ,        "auditfail":0}
 
     def has_key(self, key):
-        return self.Stats.has_key(key)
+        return key in self.Stats
 
     def __setitem__(self, key, value):
         self.Stats[key] = value
@@ -420,7 +420,7 @@ class CIBAudit(ClusterAudit):
     
     def incr(self, name):
         '''Increment (or initialize) the value associated with the given name'''
-        if not self.Stats.has_key(name):
+        if name not in self.Stats:
             self.Stats[name]=0
         self.Stats[name] = self.Stats[name]+1
 
@@ -517,7 +517,7 @@ class PartitionAudit(ClusterAudit):
         self.NodeQuorum={}
 
     def has_key(self, key):
-        return self.Stats.has_key(key)
+        return key in self.Stats
 
     def __setitem__(self, key, value):
         self.Stats[key] = value
@@ -527,7 +527,7 @@ class PartitionAudit(ClusterAudit):
     
     def incr(self, name):
         '''Increment (or initialize) the value associated with the given name'''
-        if not self.Stats.has_key(name):
+        if name not in self.Stats:
             self.Stats[name]=0
         self.Stats[name] = self.Stats[name]+1
 

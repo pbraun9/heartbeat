@@ -109,7 +109,7 @@ class RemoteExec:
         while count < 3:
            rc = os.system(self._cmd(args))
            if rc == 0: return rc
-           print "Retrying command %s" % self._cmd(args)
+           print(("Retrying command %s" % self._cmd(args)))
            count=count+1
         return rc
 
@@ -153,14 +153,14 @@ class RemoteExec:
             rc = os.system(cpstring)
             if rc == 0: 
                 return rc
-            print "Retrying command %s" % cpstring
+            print(("Retrying command %s" % cpstring))
         return rc
 
     def echo_cp(self, src_host, src_file, dest_host, dest_file):
         '''Perform a remote copy via echo'''
         (rc, lines) = self.remote_py(src_host, "os", "system", "cat %s" % src_file)
         if rc != 0:
-            print "Copy of %s:%s failed" % (src_host, src_file) 
+            print(("Copy of %s:%s failed" % (src_host, src_file))) 
 
         elif dest_host == None:
             fd = open(dest_file, "w")
@@ -185,7 +185,7 @@ class RemoteExec:
             rc = os.system(sshnoBlock)
             if rc == 0: 
                 return rc
-            print "Retrying command %s" % sshnoBlock
+            print(("Retrying command %s" % sshnoBlock))
         return rc
  
     def remote_py(self, node, module, func, *args):
@@ -241,7 +241,7 @@ class LogWatcher:
         self.whichmatch = -1
         self.unmatched = None
         if self.debug:
-            print "Debug now on for for log", log
+            print(("Debug now on for for log", log))
         self.Timeout = int(timeout)
         self.returnonlymatch = None
         if not os.access(log, os.R_OK):
@@ -276,30 +276,30 @@ class LogWatcher:
 
         done=time.time()+timeout+1
         if self.debug:
-            print "starting search: timeout=%d" % timeout
+            print(("starting search: timeout=%d" % timeout))
             for regex in self.regexes:
-                print "Looking for regex: ", regex
+                print(("Looking for regex: ", regex))
 
         while (timeout <= 0 or time.time() <= done):
             newsize=os.path.getsize(self.filename)
-            if self.debug > 4: print "newsize = %d" % newsize
+            if self.debug > 4: print(("newsize = %d" % newsize))
             if newsize < self.size:
                 # Somebody truncated the log!
-                if self.debug: print "Log truncated!"
+                if self.debug: print("Log truncated!")
                 self.setwatch(frombeginning=1)
                 continue
             if newsize > self.file.tell():
                 line=self.file.readline()
-                if self.debug > 2: print "Looking at line:", line
+                if self.debug > 2: print(("Looking at line:", line))
                 if line:
                     last_line=line
                     if not first_line:
                         first_line=line
-                        if self.debug: print "First line: "+ line
+                        if self.debug: print(("First line: "+ line))
                     which=-1
                     for regex in self.regexes:
                         which=which+1
-                        if self.debug > 3: print "Comparing line to ", regex
+                        if self.debug > 3: print(("Comparing line to ", regex))
                         #matchobj = re.search(string.lower(regex), string.lower(line))
                         matchobj = re.search(regex, line)
                         if matchobj:
@@ -307,18 +307,18 @@ class LogWatcher:
                             if self.returnonlymatch:
                               return matchobj.group(self.returnonlymatch)
                             else:
-                              if self.debug: print "Returning line"
+                              if self.debug: print("Returning line")
                               return line
             newsize=os.path.getsize(self.filename)
             if self.file.tell() == newsize:
                 if timeout > 0:
                     time.sleep(0.025)
                 else:
-                    if self.debug: print "End of file"
-                    if self.debug: print "Last line: "+last_line
+                    if self.debug: print("End of file")
+                    if self.debug: print(("Last line: "+last_line))
                     return None
-        if self.debug: print "Timeout"
-        if self.debug: print "Last line: "+last_line
+        if self.debug: print("Timeout")
+        if self.debug: print(("Last line: "+last_line))
         return None
 
     def lookforall(self, timeout=None):
@@ -417,7 +417,7 @@ class ClusterManager(UserDict):
         None
 
     def _finalConditions(self):
-        for key in self.keys():
+        for key in list(self.keys()):
             if self[key] == None:
                 raise ValueError("Improper derivation: self[" + key
                 +   "] must be overridden by subclass.")
@@ -516,7 +516,7 @@ class ClusterManager(UserDict):
         self.debug("Starting %s on node %s" %(self["Name"], node))
         ret = 1
 
-        if not self.ShouldBeStatus.has_key(node):
+        if node not in self.ShouldBeStatus:
             self.ShouldBeStatus[node] = self["down"]
 
         if self.ShouldBeStatus[node] != self["down"]:
@@ -945,7 +945,7 @@ class Process(Component):
         self.dc_pats = dc_pats
         self.CM = cm
         self.badnews_ignore = badnews_ignore
-	self.triggersreboot = triggersreboot
+        self.triggersreboot = triggersreboot
         self.KillCmd = "killall -9 " + self.name
         
     def kill(self, node):
@@ -1105,7 +1105,7 @@ According to the manual page for ping:
         '''Start the PingFest!'''
 
         self.PingSize=1024
-        if CM.Env.has_key("PingSize"):
+        if "PingSize" in CM.Env:
                 self.PingSize=CM.Env["PingSize"]
 
         CM.log("Starting %d byte flood pings" % self.PingSize)

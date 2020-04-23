@@ -77,7 +77,7 @@ static const char * Simple_helpscreen =
 "-r	Recover itself from crash. Only called by other monitor programs like"
 "	recovery manager.\n"
 "-l	List the program monitored by cl_respawn.\n"
-"	Notice: donnot support yet.\n"
+"	Notice: do not support yet.\n"
 "-h	Display this simple help.\n";
 
 

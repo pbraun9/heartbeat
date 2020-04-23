@@ -84,7 +84,7 @@ class RandomTests:
         
     def incr(self, name):
         '''Increment (or initialize) the value associated with the given name'''
-        if not self.Stats.has_key(name):
+        if name not in self.Stats:
             self.Stats[name]=0
         self.Stats[name] = self.Stats[name]+1
 
@@ -101,14 +101,14 @@ class RandomTests:
                 ignorelist.extend(test.errorstoignore())
 
             while errcount < 1000:
-                if BadNewsDebug: print "Looking for BadNews"
+                if BadNewsDebug: print("Looking for BadNews")
                 match=BadNews.look(0)
                 if match:
-                   if BadNewsDebug: print "BadNews found: "+match
+                   if BadNewsDebug: print(("BadNews found: "+match))
                    add_err = 1
                    for ignore in ignorelist:
                        if add_err == 1 and re.search(ignore, match):
-                           if BadNewsDebug: print "Ignoring based on pattern: ("+ignore+")"
+                           if BadNewsDebug: print(("Ignoring based on pattern: ("+ignore+")"))
                            add_err = 0
                    if add_err == 1:
                        self.CM.log("BadNews: " + match)
@@ -217,7 +217,7 @@ random for the selected number of iterations.
             stoptime=time.time()
             elapsed_time = stoptime - starttime
             test_time = stoptime - test.starttime
-            if not test.has_key("min_time"):
+            if "min_time" not in test:
                 test["elapsed_time"] = elapsed_time
                 test["min_time"] = test_time
                 test["max_time"] = test_time
@@ -272,7 +272,7 @@ class CTSTest:
         self.starttime=0
 
     def has_key(self, key):
-        return self.Stats.has_key(key)
+        return key in self.Stats
 
     def __setitem__(self, key, value):
         self.Stats[key] = value
@@ -282,7 +282,7 @@ class CTSTest:
 
     def incr(self, name):
         '''Increment (or initialize) the value associated with the given name'''
-        if not self.Stats.has_key(name):
+        if name not in self.Stats:
             self.Stats[name]=0
         self.Stats[name] = self.Stats[name]+1
 
@@ -633,7 +633,7 @@ class StonithTest(CTSTest):
         # for v2, stonithd test is a better test to run.
         if self.CM["Name"] == "linux-ha-v2":
             return None
-        if self.CM.Env.has_key("DoStonith"):
+        if "DoStonith" in self.CM.Env:
             return self.CM.Env["DoStonith"]
         return 1
 
@@ -707,7 +707,7 @@ class StonithdTest(StonithTest):
         if not self.CM["Name"] == "linux-ha-v2":
             return 0
 
-        if self.CM.Env.has_key("DoStonith"):
+        if "DoStonith" in self.CM.Env:
             return self.CM.Env["DoStonith"]
 
         return 1
@@ -1063,7 +1063,7 @@ class StandbyTest(CTSTest):
     def is_applicable(self):
         '''StandbyTest is applicable when the CM has a Standby command'''
 
-        if not self.CM.has_key("Standby"):
+        if "Standby" not in self.CM:
            return None
         else:
 
@@ -1082,7 +1082,7 @@ class StandbyTest(CTSTest):
                 return None
 
             cf = self.CM.cf
-            if not cf.Parameters.has_key("auto_failback"):
+            if "auto_failback" not in cf.Parameters:
                 return None
             elif cf.Parameters["auto_failback"][0] == "legacy":
                 return None
@@ -1343,7 +1343,7 @@ class BandwidthTest(CTSTest):
                 T1 = linesplit[0]
                 timesplit = string.split(T1,":")
                 time2split = string.split(timesplit[2],".")
-                time1 = (long(timesplit[0])*60+long(timesplit[1]))*60+long(time2split[0])+long(time2split[1])*0.000001
+                time1 = (int(timesplit[0])*60+int(timesplit[1]))*60+int(time2split[0])+int(time2split[1])*0.000001
                 break
 
         while count < 100:
@@ -1365,7 +1365,7 @@ class BandwidthTest(CTSTest):
         T2 = linessplit[0]
         timesplit = string.split(T2,":")
         time2split = string.split(timesplit[2],".")
-        time2 = (long(timesplit[0])*60+long(timesplit[1]))*60+long(time2split[0])+long(time2split[1])*0.000001
+        time2 = (int(timesplit[0])*60+int(timesplit[1]))*60+int(time2split[0])+int(time2split[1])*0.000001
         time = time2-time1
         if (time <= 0):
             return 0

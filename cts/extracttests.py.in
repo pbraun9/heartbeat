@@ -68,7 +68,7 @@ class ExtractTests:
         testlist = self.expandtestranges(testlist)
         testlist.sort(sorttestnum)
         self.testlist = testlist
-        print "Extracting tests ", self.testlist
+        print(("Extracting tests ", self.testlist))
         self.regex=re.compile(" CTS: Running test .*\[([0-9]+)")
         self.CTSregex=re.compile(" CTS: ")
 
@@ -95,7 +95,7 @@ class ExtractTests:
                     break
 
 if len(sys.argv) < 3:
-    print "Usage:", sys.argv[0] , "logfilename testnumber ..."
+    print(("Usage:", sys.argv[0] , "logfilename testnumber ..."))
     sys.exit(1)
 foo = ExtractTests (sys.argv[1], sys.argv[2:])
 foo()

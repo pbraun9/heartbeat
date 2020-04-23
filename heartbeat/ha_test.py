@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 __copyright__='''
 Copyright (C) 2000 Alan Robertson <alanr@unix.sh>
@@ -84,7 +84,7 @@ class RequestMsg (ha_msg):
 
                 # Remember this message
 
-                if nodes.has_key(fromnode):
+                if fromnode in nodes:
                     del nodes[fromnode]
                     replies.append(msg)
                 else:
@@ -94,7 +94,7 @@ class RequestMsg (ha_msg):
                 if len(nodes) == 0:
                     return replies, [], extras
             else:
-              return replies, nodes.keys(), extras
+              return replies, list(nodes.keys()), extras
 
     def sendall(self, api, timeout, participants=None):
 
@@ -121,7 +121,7 @@ class RequestMsg (ha_msg):
         '''
 
         if api.nodestatus(node) != hb_api.ActiveStatus:
-            print "Attempt to send request to bad/down node"
+            print("Attempt to send request to bad/down node")
         api.sendnodemsg(self, node)
         return self.WaitForReplies(api, [node], timeout)
 
@@ -188,8 +188,8 @@ class TestMappings(UserDict):
         This function is all about error checking.
         '''
 
-        if ((not isinstance(value, types.ListType)
-             and  not isinstance(value, types.TupleType))
+        if ((not isinstance(value, list)
+             and  not isinstance(value, tuple))
         or   len(value) != 2)				:
             raise ValueError("inappropriate TestMappings tuple")
 
@@ -206,13 +206,13 @@ class TestMappings(UserDict):
         '''
 
         reqtype=msg[ha_msg.F_APIREQ]
-        if self.has_key(reqtype):
+        if reqtype in self:
             self[reqtype][0](msg, self.Api, self[reqtype][1])
-        elif self.has_key(self.Api.BADREQ):
+        elif self.Api.BADREQ in self:
             self[self.Api.BADREQ][0](msg, self.Api, self[self.Api.BADREQ][1])
         else:
             #	It would be nice to do something better ;-)
-            print "No handler for request type %s" % reqtype
+            print("No handler for request type %s" % reqtype)
 
 class CTSRequest (RequestMsg):
     '''A CTS request message.  This class can be further subclassed to
@@ -230,7 +230,7 @@ class CTSReply(ReplyMsg):
 
 
 def client_stat_callback(msg, data):
-	print msg, data
+	print(msg, data)
 
 #
 #   A little test code...
@@ -258,10 +258,10 @@ if __name__ == '__main__':
 
         '''Construct and send a ping reply message.'''
 
-	print "PINGPINGPINGPINGPING from %s" % pingmsg[ha_msg.F_ORIG]
+        print("PINGPINGPINGPINGPING from %s" % pingmsg[ha_msg.F_ORIG])
         reply=CTSReply(pingmsg, api.OK)
         reply.send(api)
-	PingRequest().sendall(api, 0)
+        PingRequest().sendall(api, 0)
 
     #	Function to perform a Bad Request reply...
     def BadReq(badmsg, api, arg):
@@ -274,7 +274,7 @@ if __name__ == '__main__':
 
     hb = hb_api(debug=0)
     if not hb.signon("ping"):
-	    print >> sys.stderr, "Unable to signon with heartbeat"
+	    print("Unable to signon with heartbeat", file=sys.stderr)
 	    sys.exit(1)
 
     #	Set up response functions to automatically reply to pings when
@@ -289,15 +289,15 @@ if __name__ == '__main__':
     hb.set_msg_callback(ha_msg.T_TESTREQ, testmap, None)
     hb.set_msg_callback("hbapi-clstat", client_stat_callback, None)
 
-    print hb.cluster_config()
+    print(hb.cluster_config())
 
     req = PingRequest()  # Same as CTSRequest("ping")
-    print req.sendnode(hb, "kathyamy", 1)
+    print(req.sendnode(hb, "kathyamy", 1))
 
     spam = SpamRequest()  # Same as CTSRequest("spam")
-    print spam.sendnode(hb, "kathyamy", 1)
+    print(spam.sendnode(hb, "kathyamy", 1))
 
-    print req.sendall(hb, 1)
+    print(req.sendall(hb, 1))
 
     # Wait for some more messages.  As long as all dispatched messages are
     # handled by callbacks, and no timeout occurs, this can process an

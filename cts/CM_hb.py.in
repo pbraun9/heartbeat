@@ -372,10 +372,10 @@ class HBConfig:
         # We allow each resource group to have its own failover/back
         # policies
         #
-        if self.Parameters.has_key("nice_failback")         \
+        if "nice_failback" in self.Parameters         \
         and                self.Parameters["nice_failback"] == "on":
             HBConfig.DefaultFailbackPolicy = no_failback
-        elif self.Parameters.has_key("auto_failback")         \
+        elif "auto_failback" in self.Parameters         \
         and                self.Parameters["auto_failback"] == "off":
             HBConfig.DefaultFailbackPolicy = no_failback
         else:
@@ -401,11 +401,11 @@ class HBConfig:
             key = tokens[0]
             values = tokens[1:]
 
-            if HBConfig.MultiTokenKeywords.has_key(key):
+            if key in HBConfig.MultiTokenKeywords:
                 # group items from this line together, and separate
                 # from the items on other lines
                 values = [values]
-            if self.Parameters.has_key(key):
+            if key in self.Parameters:
                 if key == "node":
                     self.Parameters[key].extend(values)
                 else:
@@ -462,7 +462,7 @@ class HBConfig:
                 rscargs.append(Resource(name, args))
             name = tokens[0] + "__" + tokens[1]
 
-            assert not self.ResourceGroups.has_key(name)
+            assert name not in self.ResourceGroups
 
             #
             #        Create the resource group
@@ -639,10 +639,10 @@ if __name__ == '__main__':
         cf=HBConfig("/etc/ha.d")
 
 
-        print "Cluster configuration:\n"
+        print("Cluster configuration:\n")
 
-        print "Nodes:", cf.nodes(), "\n"
-        print "Config Parameters:", cf.Parameters, "\n"
+        print(("Nodes:", cf.nodes(), "\n"))
+        print(("Config Parameters:", cf.Parameters, "\n"))
 
-        for groupname in cf.ResourceGroups.keys():
-            print "Resource Group %s:\n\t%s\n" % (groupname, cf.ResourceGroups[groupname])
+        for groupname in list(cf.ResourceGroups.keys()):
+            print(("Resource Group %s:\n\t%s\n" % (groupname, cf.ResourceGroups[groupname])))

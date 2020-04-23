@@ -204,7 +204,7 @@ update_compute_leader(ccm_update_t *tab, uint j, llm_info_t *llm)
 				entry->index);
 
 	if (value == 0){
-		ccm_log(LOG_ERR, "update_compute_leader:same id comparsion?");
+		ccm_log(LOG_ERR, "update_compute_leader:same id comparison?");
 		abort();
 	}
 	
@@ -220,7 +220,7 @@ update_display(int pri,llm_info_t* llm, ccm_update_t* tab)
 {
 	int i; 
 	
-	ccm_debug(pri, "diplaying update information: ");
+	ccm_debug(pri, "displaying update information: ");
 	ccm_debug(pri, "leader=%d(%s) nodeCount=%d", 
 	       tab -> leader,
 	       (tab->leader<0 || tab->leader >= (int)llm_get_nodecount(llm))?

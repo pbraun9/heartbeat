@@ -2087,7 +2087,7 @@ if export | fgrep " CFLAGS=" > /dev/null; then
 fi
 
 if test "$GCC" = yes; then
-  CFLAGS="$CFLAGS -ggdb3"
+  CFLAGS="$CFLAGS -ggdb2"
   if
     cc_supports_flag -funsigned-char
   then
