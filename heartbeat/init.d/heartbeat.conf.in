@@ -9,6 +9,6 @@ d      @HA_VARRUNHBDIR@/dopd    0750  hacluster  haclient  -
 # d      @HA_VARRUNHBRSCDIR@	1777  root       root      -
 
 # this should be shipped by pacemaker!
-d      /var/run/crm             0750  hacluster  haclient  -
+d      /run/crm             0750  hacluster  haclient  -
 # this should be shipped by resource-agents!
-d      /var/run/resource-agents 0755  root       root      -
+d      /run/resource-agents 0755  root       root      -

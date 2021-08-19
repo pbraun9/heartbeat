@@ -778,7 +778,7 @@ dnl Determine if we use -w1 or -t1 for ping (in PYTHON Scripts)
 
 
 AC_MSG_CHECKING(ping option for timeout - w or t)
-for PING_TIMEOUT_OPT in "-w1" "-t1"
+for PING_TIMEOUT_OPT in "-w1" "-t1" "-w1"
 do
   $PING -nq -c1 $PING_TIMEOUT_OPT localhost > /dev/null 2>&1
   if
