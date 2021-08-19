@@ -2,7 +2,7 @@
 
 Debian & Ubuntu are maintaining a patchset for the good old heartbeat package.  This is an attempt to keep-up with it [for Slackware Linux](https://pub.nethence.com/daemons/linuxha-oldschool).
 
-for the record, here's how this repo gets generated and updated.
+for the record, here's how this repo was generated and updated
 
 	git clone https://github.com/pbraun9/heartbeat.git
 	cd heartbeat/
@@ -27,9 +27,9 @@ apply all debian patches (there are a few hunks since we're not exactly targetin
                 patch -p1 < $patch
                 echo
         done; unset patch
-	rm -rf debian/
+	rm -rf debian/ heartbeat_3.0.6-11.debian.tar.xz
 
-update this GIT repo accordingly
+update the repo accordingly
 
 	git status
 	git commit -a
